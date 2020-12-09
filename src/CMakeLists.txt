@@ -25,12 +25,32 @@ if (APPLE)
         "${Joystick_SOURCE_DIR}/src/macos/Joystick.cpp")
 endif()
 
-add_library(joystick ${SOURCES} ${HEADERS})
-add_library(Joystick::Joystick ALIAS joystick)
-target_include_directories(joystick PUBLIC "${Joystick_SOURCE_DIR}/include")
+add_library(Joystick ${SOURCES} ${HEADERS})
+add_library(Joystick::Joystick ALIAS Joystick)
 
 if (APPLE)
-    target_link_libraries(joystick ${IOKIT_LIB} ${FOUNDATION_LIB} ${APPKIT_LIB})
+    target_link_libraries(Joystick ${IOKIT_LIB} ${FOUNDATION_LIB} ${APPKIT_LIB})
 endif()
 
-target_compile_features(joystick PUBLIC cxx_std_11)
+target_include_directories(Joystick
+    PUBLIC
+        $<INSTALL_INTERFACE:include>
+        $<BUILD_INTERFACE:${Joystick_SOURCE_DIR}/include>
+    PRIVATE
+        ${Joystick_SOURCE_DIR}/include
+)
+
+target_compile_features(Joystick PUBLIC cxx_std_11)
+
+install(
+    TARGETS Joystick
+    EXPORT JoystickTargets
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    RUNTIME DESTINATION bin)
+
+install(
+    EXPORT JoystickTargets
+    FILE JoystickTargets.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Joystick
+    NAMESPACE Joystick::)
